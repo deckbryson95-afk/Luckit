@@ -50,7 +50,7 @@ export async function signUp(username, password) {
         };
     }
 
-    const email = username + "@lucklit.local";
+    const email = username + "@luckit.local";
 
     const { data, error } = await supabase.auth.signUp({
         email: email,
