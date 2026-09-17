@@ -1,0 +1,9 @@
+{
+  "name": "lucklit",
+  "version": "1.0.0",
+  "description": "Lucklit",
+  "private": true,
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
