@@ -3,69 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luckit Stats</title>
+
+    <title>Lucklit Sign Up</title>
 
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #07552f;
+            margin: 0;
             min-height: 100vh;
-            overflow-x: hidden;
+            background: #0b6b3a;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
         .clover {
             position: fixed;
-            top: -50px;
-            width: 30px;
-            height: 30px;
-            animation: fall linear infinite;
+            width: 22px;
+            height: 22px;
             opacity: 0.25;
-            z-index: 0;
+            animation: fall linear infinite;
         }
 
-        .leaf {
+        .clover::before,
+        .clover::after {
+            content: "";
             position: absolute;
-            width: 15px;
-            height: 15px;
-            background: #d9eee3;
+            width: 11px;
+            height: 11px;
+            background: #d8f3df;
             border-radius: 50%;
         }
 
-        .leaf:nth-child(1) {
+        .clover::before {
             top: 0;
-            left: 7px;
-        }
-
-        .leaf:nth-child(2) {
-            top: 7px;
             left: 0;
+            box-shadow:
+                11px 0 #d8f3df,
+                0 11px #d8f3df,
+                11px 11px #d8f3df;
         }
 
-        .leaf:nth-child(3) {
-            top: 7px;
-            right: 0;
-        }
-
-        .leaf:nth-child(4) {
-            bottom: 0;
-            left: 7px;
-        }
-
-        .stem {
-            position: absolute;
-            width: 3px;
-            height: 12px;
-            background: #d9eee3;
-            left: 14px;
+        .clover::after {
+            width: 5px;
+            height: 10px;
+            background: #d8f3df;
+            border-radius: 3px;
             top: 17px;
-            transform: rotate(25deg);
-            transform-origin: top;
+            left: 8px;
+        }
+
+        .clover:nth-child(1) {
+            left: 8%;
+            animation-duration: 10s;
+            animation-delay: -2s;
+        }
+
+        .clover:nth-child(2) {
+            left: 22%;
+            animation-duration: 13s;
+            animation-delay: -7s;
+        }
+
+        .clover:nth-child(3) {
+            left: 39%;
+            animation-duration: 11s;
+            animation-delay: -4s;
+        }
+
+        .clover:nth-child(4) {
+            left: 56%;
+            animation-duration: 14s;
+            animation-delay: -9s;
+        }
+
+        .clover:nth-child(5) {
+            left: 73%;
+            animation-duration: 12s;
+            animation-delay: -5s;
+        }
+
+        .clover:nth-child(6) {
+            left: 89%;
+            animation-duration: 15s;
+            animation-delay: -11s;
         }
 
         @keyframes fall {
@@ -78,222 +104,176 @@
             }
         }
 
-        .clover:nth-child(1) {
-            left: 5%;
-            animation-duration: 9s;
-        }
-
-        .clover:nth-child(2) {
-            left: 18%;
-            animation-duration: 12s;
-            animation-delay: 2s;
-        }
-
-        .clover:nth-child(3) {
-            left: 32%;
-            animation-duration: 10s;
-            animation-delay: 4s;
-        }
-
-        .clover:nth-child(4) {
-            left: 48%;
-            animation-duration: 13s;
-            animation-delay: 1s;
-        }
-
-        .clover:nth-child(5) {
-            left: 65%;
-            animation-duration: 11s;
-            animation-delay: 3s;
-        }
-
-        .clover:nth-child(6) {
-            left: 82%;
-            animation-duration: 14s;
-            animation-delay: 5s;
-        }
-
-        .page {
-            position: relative;
-            z-index: 1;
-            width: 90%;
-            max-width: 900px;
-            min-height: 100vh;
-            margin: 0 auto;
-            padding: 60px 0 35px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .profile {
-            background: #0b6b3a;
-            border-radius: 14px;
-            padding: 25px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .avatar {
-            width: 75px;
-            height: 75px;
+        .signup-card {
+            width: 390px;
+            max-width: calc(100% - 32px);
+            padding: 34px;
             background: #07552f;
-            color: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            font-weight: bold;
+            border-radius: 16px;
+            position: relative;
+            z-index: 2;
         }
 
-        .username {
-            font-size: 25px;
-            font-weight: bold;
-            color: #e8f5ec;
+        .logo {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 18px;
+            display: block;
+            object-fit: contain;
         }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-top: 25px;
-        }
-
-        .stat-card {
-            background: #0b6b3a;
-            border-radius: 12px;
-            padding: 25px;
+        h1 {
+            margin: 0 0 26px;
             text-align: center;
+            color: white;
+            font-size: 28px;
         }
 
-        .stat-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #d9eee3;
-            margin-bottom: 10px;
+        .input-group {
+            margin-bottom: 15px;
         }
 
-        .stat-value {
-            font-size: 32px;
+        input {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            border: 1px solid #4a9a70;
+            border-radius: 9px;
+            background: #0b6b3a;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #b9dfc7;
+        }
+
+        input:focus {
+            border-color: #d8f3df;
+        }
+
+        button {
+            width: 100%;
+            height: 48px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 9px;
+            background: #d8f3df;
+            color: #07552f;
+            font-size: 15px;
             font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #ffffff;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        #message {
+            min-height: 20px;
+            margin: 15px 0 0;
+            text-align: center;
             color: #ffffff;
+            font-size: 14px;
         }
 
-        .logout {
-            margin-top: auto;
-            padding-top: 50px;
+        .login-link {
+            margin-top: 20px;
+            text-align: center;
+            color: #b9dfc7;
+            font-size: 14px;
         }
 
-        .logout-btn {
-    width: 400px;
-    height: 44px;
-    padding: 0;
-    margin: 24px auto 0;
-    display: block;
-    border: none;
-    border-radius: 10px;
-    background: #0b6b3a;
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.logout-btn:hover {
-    background: #0d7a43;
-}
-
-        .logout button:hover {
-            background: #0d7942;
-        }
-
-        @media (max-width: 600px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
+        .login-link a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="clover">
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="stem"></div>
-    </div>
+    <div class="clover"></div>
+    <div class="clover"></div>
+    <div class="clover"></div>
+    <div class="clover"></div>
+    <div class="clover"></div>
+    <div class="clover"></div>
 
-    <div class="clover">
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="stem"></div>
-    </div>
+    <div class="signup-card">
 
-    <div class="clover">
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="stem"></div>
-    </div>
+        <img
+            class="logo"
+            src="https://media.discordapp.net/attachments/1550252456749834320/1550273997432946728/65D379D8-D9BD-48AB-BAB6-82584B63BDF6.png?ex=6aadbcab&is=6aac6b2b&hm=96d349080b2c6"
+            alt="Lucklit"
+        >
 
-    <div class="clover">
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="stem"></div>
-    </div>
+        <h1>Create Account</h1>
 
-    <div class="clover">
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="stem"></div>
-    </div>
+        <form id="signupForm">
 
-    <div class="clover">
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="leaf"></div>
-        <div class="stem"></div>
-    </div>
-
-    <div class="page">
-
-        <div class="profile">
-            <div class="avatar" id="avatar">U</div>
-            <div class="username" id="username">Loading...</div>
-        </div>
-
-        <div class="stats">
-
-            <div class="stat-card">
-                <div class="stat-title">Lucks</div>
-                <div class="stat-value" id="lucks">0</div>
+            <div class="input-group">
+                <input
+                    id="username"
+                    type="text"
+                    placeholder="Username"
+                    maxlength="20"
+                    autocomplete="username"
+                    required
+                >
             </div>
 
-            <div class="stat-card">
-                <div class="stat-title">Blooks Unlocked</div>
-                <div class="stat-value" id="blooks">0</div>
+            <div class="input-group">
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="Password"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                >
             </div>
 
-            <div class="stat-card">
-                <div class="stat-title">Packs Opened</div>
-                <div class="stat-value" id="packs">0</div>
+            <div class="input-group">
+                <input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm Password"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                >
             </div>
 
-        </div>
+            <div class="input-group">
+                <input
+                    id="registrationCode"
+                    type="text"
+                    placeholder="Discord Registration Code"
+                    maxlength="11"
+                    autocomplete="off"
+                    required
+                >
+            </div>
 
-        <div class="logout">
-            <button id="logoutButton">Log Out</button>
+            <button id="signupButton" type="submit">
+                Sign Up
+            </button>
+
+            <p id="message"></p>
+
+        </form>
+
+        <div class="login-link">
+            Already have an account?
+            <a href="login.html">Log In</a>
         </div>
 
     </div>
@@ -302,64 +282,236 @@
 
         import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-        const SUPABASE_URL = "https://mmrvamxpqqsozijrrnlx.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_5rSQewEmqfaEDleTv93jIw_A_dUBT1Q";
+        const SUPABASE_URL =
+            "https://mmrvamxpqqsozijrrnlx.supabase.co";
+
+        const SUPABASE_KEY =
+            "sb_publishable_5rSQewEmqfaEDleTv93jIw_A_dUBT1Q";
 
         const supabase = createClient(
             SUPABASE_URL,
             SUPABASE_KEY
         );
 
-        async function loadProfile() {
+
+        const form =
+            document.getElementById("signupForm");
+
+        const usernameInput =
+            document.getElementById("username");
+
+        const passwordInput =
+            document.getElementById("password");
+
+        const confirmPasswordInput =
+            document.getElementById("confirmPassword");
+
+        const registrationCodeInput =
+            document.getElementById("registrationCode");
+
+        const message =
+            document.getElementById("message");
+
+        const signupButton =
+            document.getElementById("signupButton");
+
+
+        form.addEventListener("submit", async (event) => {
+
+            event.preventDefault();
+
+            message.textContent = "";
+            signupButton.disabled = true;
+
+            let username =
+                usernameInput.value
+                    .trim()
+                    .toLowerCase();
+
+            const password =
+                passwordInput.value;
+
+            const confirmPassword =
+                confirmPasswordInput.value;
+
+            const registrationCode =
+                registrationCodeInput.value
+                    .trim()
+                    .toUpperCase();
+
+
+            if (!/^[a-z0-9_]+$/.test(username)) {
+
+                message.textContent =
+                    "Username can only contain letters, numbers, and underscores.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            if (username.length < 3) {
+
+                message.textContent =
+                    "Username must be at least 3 characters.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            if (password.length < 6) {
+
+                message.textContent =
+                    "Password must be at least 6 characters.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            if (password !== confirmPassword) {
+
+                message.textContent =
+                    "Passwords do not match.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            if (!/^LK-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(registrationCode)) {
+
+                message.textContent =
+                    "Enter a valid Discord registration code.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
 
             const {
-                data: {
-                    user
-                }
-            } = await supabase.auth.getUser();
-
-            if (!user) {
-                window.location.href = "login.html";
-                return;
-            }
-
-            const { data, error } = await supabase
+                data: existingProfile,
+                error: profileCheckError
+            } = await supabase
                 .from("profiles")
-                .select("username, lucks, blooks_unlocked, packs_opened")
-                .eq("id", user.id)
-                .single();
+                .select("id")
+                .eq("username", username)
+                .maybeSingle();
 
-            if (error || !data) {
-                window.location.href = "login.html";
+
+            if (profileCheckError) {
+
+                message.textContent =
+                    "Could not check username.";
+
+                signupButton.disabled = false;
                 return;
             }
 
-            document.getElementById("username").textContent =
-                data.username;
 
-            document.getElementById("avatar").textContent =
-                data.username.charAt(0).toUpperCase();
+            if (existingProfile) {
 
-            document.getElementById("lucks").textContent =
-                data.lucks;
+                message.textContent =
+                    "That username is already taken.";
 
-            document.getElementById("blooks").textContent =
-                data.blooks_unlocked;
+                signupButton.disabled = false;
+                return;
+            }
 
-            document.getElementById("packs").textContent =
-                data.packs_opened;
-        }
 
-        document
-            .getElementById("logoutButton")
-            .addEventListener("click", async function() {
+            const {
+                data: codeValid,
+                error: codeError
+            } = await supabase.rpc(
+                "use_registration_code",
+                {
+                    input_code: registrationCode
+                }
+            );
+
+
+            if (codeError || !codeValid) {
+
+                message.textContent =
+                    "Invalid or already used registration code.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            const email =
+                username + "@lucklit.com";
+
+
+            const {
+                data,
+                error
+            } = await supabase.auth.signUp({
+                email: email,
+                password: password
+            });
+
+
+            if (error) {
+
+                message.textContent =
+                    error.message;
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            if (!data.user) {
+
+                message.textContent =
+                    "Account creation failed.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            if (!data.session) {
+
+                message.textContent =
+                    "Account created, but email confirmation is enabled in Supabase.";
+
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            const {
+                error: profileError
+            } = await supabase
+                .from("profiles")
+                .insert({
+                    id: data.user.id,
+                    username: username,
+                    lucks: 0,
+                    blooks_unlocked: 0,
+                    packs_opened: 0
+                });
+
+
+            if (profileError) {
 
                 await supabase.auth.signOut();
 
-                window.location.href = "login.html";
-            });
+                message.textContent =
+                    "Could not create your profile.";
 
-        loadProfile();
+                signupButton.disabled = false;
+                return;
+            }
+
+
+            window.location.href =
+                "stats.html";
+        });
 
     </script>
 
