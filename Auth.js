@@ -1,15 +1,24 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://mjkieyjmdkgvoywwbgcn.supabase.co";
-const SUPABASE_KEY = "sb_publishable_IuH3kfIixAOSS2FwxirUtg_EJ89PD9o";
+const SUPABASE_KEY = "sb_publishable_guhukPTVtX9LVN2JiIwaow_Wvv1BJ2g";
 
 export const supabase = createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_KEY,
+    {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    }
 );
 
-export async function signUp(username, password) {
+const accountEmail = username =>
+    `${username.trim().toLowerCase()}@luckit.com`;
 
+export async function signUp(username, password) {
     username = username.trim().toLowerCase();
 
     if (!/^[a-z0-9_]+$/.test(username)) {
@@ -20,10 +29,10 @@ export async function signUp(username, password) {
         };
     }
 
-    if (username.length < 3) {
+    if (username.length < 3 || username.length > 20) {
         return {
             error: {
-                message: "Username must be at least 3 characters."
+                message: "Username must be between 3 and 20 characters."
             }
         };
     }
@@ -36,11 +45,18 @@ export async function signUp(username, password) {
         };
     }
 
-    const { data: existingProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username)
-        .maybeSingle();
+    const { data: existingProfile, error: profileCheckError } =
+        await supabase
+            .from("profiles")
+            .select("id")
+            .eq("username", username)
+            .maybeSingle();
+
+    if (profileCheckError) {
+        return {
+            error: profileCheckError
+        };
+    }
 
     if (existingProfile) {
         return {
@@ -50,15 +66,16 @@ export async function signUp(username, password) {
         };
     }
 
-    const email = username + "@lucklit.local";
-
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password
-    });
+    const { data, error } =
+        await supabase.auth.signUp({
+            email: accountEmail(username),
+            password
+        });
 
     if (error) {
-        return { error };
+        return {
+            error
+        };
     }
 
     if (!data.user) {
@@ -72,23 +89,27 @@ export async function signUp(username, password) {
     if (!data.session) {
         return {
             error: {
-                message: "Account created, but email confirmation is enabled in Supabase."
+                message: "Account created. Check your email to confirm your account."
             }
         };
     }
 
-    const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-            id: data.user.id,
-            username: username,
-            lucks: 0,
-            blooks_unlocked: 0,
-            packs_opened: 0
-        });
+    const { error: profileError } =
+        await supabase
+            .from("profiles")
+            .insert({
+                id: data.user.id,
+                username,
+                lucks: 0,
+                blooks_unlocked: 0,
+                packs_opened: 0,
+                tokens: 0
+            });
 
     if (profileError) {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({
+            scope: "local"
+        });
 
         return {
             error: {
@@ -98,39 +119,58 @@ export async function signUp(username, password) {
     }
 
     return {
-        data
+        data,
+        error: null
     };
 }
 
 export async function logIn(username, password) {
-
     username = username.trim().toLowerCase();
 
-    const email = username + "@lucklit.local";
+    if (!username) {
+        return {
+            error: {
+                message: "Enter your username."
+            }
+        };
+    }
+
+    if (!password) {
+        return {
+            error: {
+                message: "Enter your password."
+            }
+        };
+    }
 
     return await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
+        email: accountEmail(username),
+        password
     });
 }
 
 export async function logOut() {
-    return await supabase.auth.signOut();
+    return await supabase.auth.signOut({
+        scope: "local"
+    });
 }
 
 export async function getCurrentUser() {
-
     const {
         data: {
             user
-        }
+        },
+        error
     } = await supabase.auth.getUser();
+
+    if (error) {
+        return null;
+    }
 
     return user;
 }
 
 export async function getProfile() {
-
     const user = await getCurrentUser();
 
     if (!user) {
@@ -141,15 +181,56 @@ export async function getProfile() {
         };
     }
 
-    const { data, error } = await supabase
+    const {
+        data,
+        error
+    } = await supabase
         .from("profiles")
-        .select("username, lucks, blooks_unlocked, packs_opened")
+        .select(`
+            id,
+            username,
+            lucks,
+            blooks_unlocked,
+            packs_opened,
+            tokens,
+            last_hourly_reward,
+            is_Admin,
+            is_banned,
+            ban_reason
+        `)
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
     return {
         user,
         profile: data,
+        error
+    };
+}
+
+export async function spinDailyWheel() {
+    const user = await getCurrentUser();
+
+    if (!user) {
+        return {
+            data: null,
+            error: {
+                message: "You must be logged in to spin the daily wheel."
+            }
+        };
+    }
+
+    const {
+        data,
+        error
+    } = await supabase.rpc(
+        "spin_daily_wheel"
+    );
+
+    return {
+        data: Array.isArray(data)
+            ? data[0]
+            : data,
         error
     };
 }
