@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Luckit - Sign Up
+  </title>
+  <style>
+   * {
+    box-sizing:border-box
+}
+body {
+    margin:0;
+    min-height:100vh;
+    background:#0b6b3a;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    display:grid;
+    place-items:center
+}
+.card {
+    width:390px;
+    max-width:calc(100% - 32px);
+    background:#07552f;
+    border-radius:16px;
+    padding:34px
+}
+.logo {
+    display:block;
+    width:90px;
+    height:90px;
+    object-fit:contain;
+    margin:0 auto 18px
+}
+h1 {
+    text-align:center;
+    margin:0 0 25px
+}
+input {
+    width:100%;
+    height:48px;
+    margin-bottom:14px;
+    border:1px solid #4a9a70;
+    border-radius:9px;
+    background:#0b6b3a;
+    color:#fff;
+    padding:0 14px;
+    font-size:15px
+}
+button {
+    width:100%;
+    height:48px;
+    border:0;
+    border-radius:9px;
+    background:#d8f3df;
+    color:#07552f;
+    font-weight:700;
+    cursor:pointer
+}
+button:disabled {
+    opacity:.6
+}
+#message {
+    text-align:center;
+    min-height:20px;
+    margin:15px 0
+}
+.link {
+    text-align:center;
+    color:#b9dfc7;
+    font-size:14px
+}
+.link a {
+    color:#fff;
+    font-weight:700;
+    text-decoration:none
+}
+  </style>
+ </head>
+ <body>
+  <div class="card">
+   <img alt="Luckit" class="logo" src="https://media.discordapp.net/attachments/1550252456749834320/1550273997432946728/65D379D8-D9BD-48AB-BAB6-82584B63BDF6.png?ex=6aadbcab&amp;is=6aac6b2b&amp;hm=96d349080b2c6"/>
+   <h1>
+    Create Account
+   </h1>
+   <form id="form">
+    <input autocomplete="username" id="username" maxlength="20" placeholder="Username" required=""/>
+    <input autocomplete="new-password" id="password" minlength="6" placeholder="Password" required="" type="password"/>
+    <input autocomplete="new-password" id="confirm" minlength="6" placeholder="Confirm Password" required="" type="password"/>
+    <button id="button">
+     Sign Up
+    </button>
+    <p id="message">
+    </p>
+   </form>
+   <div class="link">
+    Already have an account?
+    <a href="login.html">
+     Log In
+    </a>
+   </div>
+  </div>
+  <script type="module">
+   import { signUp } from "./Auth.js";
+const form=document.getElementById("form"),button=document.getElementById("button"),message=document.getElementById("message");
+form.addEventListener("submit",async e=>{
+ e.preventDefault();button.disabled=true;message.textContent="Creating account...";
+ if(password.value!==confirm.value){message.textContent="Passwords do not match.";button.disabled=false;return}
+ const r=await signUp(username.value,password.value);
+ if(r.error){message.textContent=r.error.message;button.disabled=false;return}
+ if(r.data?.session){location.replace("stats.html");return}
+ message.textContent=r.error?.message||"Account created. Check your email if confirmation is required.";
+ button.disabled=false;
+});
+  </script>
+ </body>
+</html>

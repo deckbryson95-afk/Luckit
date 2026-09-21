@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Luckit - Market
+  </title>
+  <style>
+   * {
+    box-sizing:border-box
+}
+body {
+    margin:0;
+    background:#07552f;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    padding:30px 20px 100px
+}
+.page {
+    max-width:1100px;
+    margin:auto
+}
+h1 {
+    margin-top:0
+}
+.coins {
+    color:#ccebd9
+}
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:18px
+}
+.item {
+    background:#0b6b3a;
+    border-radius:14px;
+    padding:18px
+}
+.item img {
+    width:100%;
+    height:160px;
+    object-fit:contain;
+    background:#063f24;
+    border-radius:10px
+}
+.item h2 {
+    font-size:18px
+}
+.price {
+    color:#d8f3df;
+    font-weight:700
+}
+.buy {
+    width:100%;
+    background:#d8f3df;
+    color:#07552f
+}
+.buy:disabled {
+    opacity:.5
+}
+.message {
+    min-height:22px;
+    margin:15px 0
+}
+.nav {
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:72px;
+    background:#032f1c;
+    display:flex
+}
+.nav a {
+    min-width:120px;
+    display:grid;
+    place-items:center;
+    color:#fff;
+    text-decoration:none
+}
+.nav a.active {
+    background:#0b6b3a
+}
+  </style>
+ </head>
+ <body>
+  <div class="page">
+   <h1>
+    Market
+   </h1>
+   <div class="coins" id="coins">
+    Loading...
+   </div>
+   <div class="message" id="message">
+   </div>
+   <div class="grid" id="grid">
+   </div>
+  </div>
+  <nav class="nav">
+   <a href="stats.html">
+    Stats
+   </a>
+   <a class="active" href="market.html">
+    Market
+   </a>
+   <a href="admin.html" id="admin" style="display:none">
+    Admin
+   </a>
+  </nav>
+  <script type="module">
+   import {supabase,getProfile} from "./Auth.js";
+const $=id=>document.getElementById(id);
+let profile;
+async function load() {
+    const r=await getProfile();
+    if(!r.user) {
+        location.replace("login.html");
+        return
+    }
+    if(r.error||!r.profile) {
+        $("message").textContent=r.error?.message||"Could not load profile.";
+        return
+    }
+    profile=r.profile;
+    $("coins").textContent=`Tokens: ${Number(profile.tokens||0).toLocaleString()}`;
+    $("admin").style.display=profile.is_Admin?"grid":"none";
+    const {data,error}=await supabase.from("market_items").select("id,name,image_url,price,enabled").eq("enabled",true).order("created_at",{ascending:false
+}
+);
+if(error) {
+    $("message").textContent=error.message;
+    return
+}
+if(!data?.length) {
+    $("grid").innerHTML="<div>No market items are available right now.</div>";
+    return
+}
+$("grid").innerHTML=data.map(x=>`<div class="item"><img src="${x.image_url||""}" alt=""><h2>${escapeHtml(x.name)}</h2><div class="price">${Number(x.price||0).toLocaleString()} tokens</div><button class="buy" data-id="${x.id}">Buy</button></div>`).join("");
+document.querySelectorAll(".buy").forEach(b=>b.onclick=()=>buy(b.dataset.id))}
+function escapeHtml(v) {
+    return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+async function buy(id){$("message").textContent="";const item=await supabase.from("market_items").select("id,price,name").eq("id",id).maybeSingle();if(item.error||!item.data){$("message").textContent="Item not found.";return}if(Number(profile.tokens)<Number(item.data.price)){ $("message").textContent="Not enough tokens.";return }$("message").textContent="Purchasing...";const {error}=await supabase.from("market_purchases").insert({user_id:profile.id,market_item_id:id,price_paid:item.data.price});if(error){$("message").textContent=error.message;return}$("message").textContent=`Purchased ${item.data.name}.`;await load()}
+load();
+  </script>
+ </body>
+</html>

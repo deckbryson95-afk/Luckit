@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Luckit - Admin
+  </title>
+  <style>
+   * {
+    box-sizing:border-box
+}
+body {
+    margin:0;
+    background:#07552f;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    padding:30px 20px 100px
+}
+.page {
+    max-width:1000px;
+    margin:auto
+}
+.panel {
+    background:#0b6b3a;
+    border-radius:14px;
+    padding:24px;
+    margin-bottom:18px
+}
+.row {
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap
+}
+input,textarea {
+    background:#063f24;
+    border:1px solid #4a9a70;
+    color:#fff;
+    border-radius:8px;
+    padding:12px;
+    width:100%
+}
+.field {
+    flex:1;
+    min-width:220px
+}
+button {
+    border:0;
+    border-radius:8px;
+    padding:12px 18px;
+    font-weight:700;
+    cursor:pointer
+}
+.danger {
+    background:#8b1e1e;
+    color:#fff
+}
+.normal {
+    background:#d8f3df;
+    color:#07552f
+}
+.message {
+    min-height:22px
+}
+.nav {
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:72px;
+    background:#032f1c;
+    display:flex
+}
+.nav a {
+    min-width:120px;
+    display:grid;
+    place-items:center;
+    color:#fff;
+    text-decoration:none
+}
+  </style>
+ </head>
+ <body>
+  <div class="page" id="app" style="display:none">
+   <h1>
+    Admin Panel
+   </h1>
+   <div class="panel">
+    <h2>
+     Ban Player
+    </h2>
+    <div class="row">
+     <div class="field">
+      <input id="target" placeholder="Username"/>
+     </div>
+     <div class="field">
+      <input id="reason" placeholder="Reason"/>
+     </div>
+     <button class="danger" id="ban">
+      Ban Player
+     </button>
+    </div>
+   </div>
+   <div class="panel">
+    <h2>
+     Activity Logs
+    </h2>
+    <button class="normal" id="refresh">
+     Refresh
+    </button>
+    <div id="logs">
+    </div>
+   </div>
+   <div class="message" id="message">
+   </div>
+  </div>
+  <nav class="nav">
+   <a href="stats.html">
+    Stats
+   </a>
+   <a href="market.html">
+    Market
+   </a>
+  </nav>
+  <script type="module">
+   import {supabase,getProfile} from "./Auth.js";
+const $=id=>document.getElementById(id);
+async function start() {
+    const r=await getProfile();
+    if(!r.user) {
+        location.replace("login.html");
+        return
+    }
+    if(r.error||!r.profile?.is_Admin) {
+        location.replace("stats.html");
+        return
+    }
+    $("app").style.display="block";
+    loadLogs()
+}
+async function loadLogs() {
+    const {data,error}=await supabase.from("player_activity_logs").select("id,username,action,details,created_at").order("created_at",{ascending:false
+}
+).limit(100);
+if(error) {
+    $("logs").textContent=error.message;
+    return
+}
+$("logs").innerHTML=(data||[]).map(x=>`<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1)"><b>${String(x.username||"")}</b> — ${String(x.action||"")}<br><small>${new Date(x.created_at).toLocaleString()}</small></div>`).join("")||"No logs."}
+$("ban").onclick=async()=> {
+    const target=$("target").value.trim(),reason=$("reason").value.trim()||"Banned by an administrator";
+    if(!target) {
+        $("message").textContent="Enter a username.";
+        return
+    }
+    $("message").textContent="Banning...";
+    const {data,error}=await supabase.rpc("admin_ban_player",{target_username:target,reason
+}
+);
+if(error) {
+    $("message").textContent=error.message;
+    return
+}
+$("message").textContent=`${data?.username||target} was banned.`};
+$("refresh").onclick=loadLogs;
+start();
+  </script>
+ </body>
+</html>

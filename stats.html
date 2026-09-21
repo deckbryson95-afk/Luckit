@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <title>
+   Luckit - Stats
+  </title>
+  <style>
+   * {
+    box-sizing:border-box
+}
+body {
+    margin:0;
+    min-height:100vh;
+    padding:30px 20px 100px;
+    background:#07552f;
+    color:#fff;
+    font-family:Arial,sans-serif
+}
+.page {
+    max-width:1050px;
+    margin:auto
+}
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px
+}
+.header h1 {
+    margin:0
+}
+.user {
+    color:#ccebd9;
+    margin-top:6px
+}
+button {
+    border:0;
+    border-radius:9px;
+    padding:12px 18px;
+    font-weight:700;
+    cursor:pointer
+}
+.logout {
+    background:#063f24;
+    color:#fff
+}
+.grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px
+}
+.card,.reward {
+    background:#0b6b3a;
+    border-radius:14px;
+    padding:24px
+}
+.label {
+    color:#ccebd9;
+    font-size:14px
+}
+.value {
+    font-size:30px;
+    font-weight:700;
+    margin-top:8px
+}
+.reward {
+    margin-top:18px;
+    text-align:center
+}
+.wheel {
+    width:280px;
+    height:280px;
+    border-radius:50%;
+    margin:25px auto;
+    background:conic-gradient(#167342 0 60deg,#0d5c35 60deg 120deg,#167342 120deg 180deg,#0d5c35 180deg 240deg,#167342 240deg 300deg,#0d5c35 300deg);
+    border:8px solid #fff;
+    display:grid;
+    place-items:center;
+    transition:transform 4s cubic-bezier(.15,.8,.15,1)
+}
+.wheel div {
+    width:95px;
+    height:95px;
+    border-radius:50%;
+    background:#07552f;
+    border:5px solid #fff;
+    display:grid;
+    place-items:center;
+    font-weight:700
+}
+.spin {
+    background:#07552f;
+    color:#fff
+}
+.message {
+    min-height:22px;
+    margin:14px
+}
+.timer {
+    color:#ccebd9
+}
+.nav {
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:72px;
+    background:#032f1c;
+    display:flex;
+    overflow:auto
+}
+.nav a {
+    min-width:100px;
+    display:grid;
+    place-items:center;
+    color:#fff;
+    text-decoration:none;
+    font-size:13px
+}
+.nav a.active {
+    background:#0b6b3a
+}
+@media(max-width:650px) {
+    .grid {
+        grid-template-columns:1fr
+    }
+    .wheel {
+        width:240px;
+        height:240px
+    }
+}
+  </style>
+ </head>
+ <body>
+  <div class="page">
+   <div class="header">
+    <div>
+     <h1>
+      Stats
+     </h1>
+     <div class="user" id="user">
+     </div>
+    </div>
+    <button class="logout" id="logout">
+     Log Out
+    </button>
+   </div>
+   <div class="grid">
+    <div class="card">
+     <div class="label">
+      Tokens
+     </div>
+     <div class="value" id="tokens">
+      0
+     </div>
+    </div>
+    <div class="card">
+     <div class="label">
+      Lucks
+     </div>
+     <div class="value" id="lucks">
+      0
+     </div>
+    </div>
+    <div class="card">
+     <div class="label">
+      Packs Opened
+     </div>
+     <div class="value" id="packs">
+      0
+     </div>
+    </div>
+   </div>
+   <div class="reward">
+    <h2>
+     Hourly Reward
+    </h2>
+    <div class="timer" id="timer">
+    </div>
+    <div class="wheel" id="wheel">
+     <div>
+      SPIN
+     </div>
+    </div>
+    <button class="spin" id="spin">
+     OPEN WHEEL
+    </button>
+    <div class="message" id="message">
+    </div>
+   </div>
+  </div>
+  <nav class="nav">
+   <a class="active" href="stats.html">
+    Stats
+   </a>
+   <a href="market.html">
+    Market
+   </a>
+   <a href="admin.html" id="adminLink" style="display:none">
+    Admin
+   </a>
+   <a href="login.html" id="logoutLink">
+    Log Out
+   </a>
+  </nav>
+  <script type="module">
+   import {supabase,getProfile,logOut,claimHourlyReward} from "./Auth.js";
+const $=id=>document.getElementById(id);
+let profile=null,rotation=0,busy=false;
+function n(v) {
+    return Number(v||0).toLocaleString()
+}
+function timer() {
+    if(!profile?.last_hourly_reward) {
+        $("timer").textContent="Reward ready";
+        $("spin").disabled=false;
+        return
+    }
+    const left=new Date(profile.last_hourly_reward).getTime()+3600000-Date.now();
+    if(left<=0) {
+        $("timer").textContent="Reward ready";
+        $("spin").disabled=false;
+        return
+    }
+    $("spin").disabled=true;
+    let s=Math.floor(left/1000),h=Math.floor(s/3600);
+    s%=3600;
+    let m=Math.floor(s/60);
+    s%=60;
+    $("timer").textContent=`Next reward in ${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+}
+async function load() {
+    const r=await getProfile();
+    if(!r.user) {
+        location.replace("login.html");
+        return
+    }
+    if(r.error||!r.profile) {
+        $("message").textContent=r.error?.message||"Profile not found.";
+        return
+    }
+    profile=r.profile;
+    if(profile.is_banned) {
+        await logOut();
+        location.replace("login.html");
+        return
+    }
+    $("user").textContent=profile.username;
+    $("tokens").textContent=n(profile.tokens);
+    $("lucks").textContent=n(profile.lucks);
+    $("packs").textContent=n(profile.packs_opened);
+    $("adminLink").style.display=profile.is_Admin?"grid":"none";
+    timer()
+}
+$("logout").onclick=async()=> {
+    await logOut();
+    location.replace("login.html")
+};
+$("spin").onclick=async()=> {
+    if(busy)return;
+    busy=true;
+    $("spin").disabled=true;
+    $("message").textContent="";
+    const r=await claimHourlyReward();
+    if(r.error) {
+        $("message").textContent=r.error.message;
+        busy=false;
+        await load();
+        return
+    }
+    const reward=Number(r.data?.reward??r.data?.tokens??0);
+    rotation+=1800+Math.floor(Math.random()*360);
+    $("wheel").style.transform=`rotate(${rotation}deg)`;
+    setTimeout(async()=>{$("message").textContent=`You received ${n(reward)} tokens.`;busy=false;await load()
+},4100)};
+await load();
+setInterval(load,10000);
+setInterval(timer,1000);
+  </script>
+ </body>
+</html>
